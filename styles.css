@@ -706,9 +706,58 @@ input[type="range"] {
 }
 
 .publish-card,
-.risk-list {
+.risk-list,
+.variant-output,
+.evaluation-grid {
   display: grid;
   gap: 10px;
+}
+
+.variant-output {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.variant-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  text-align: left;
+}
+
+.variant-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(18, 102, 95, 0.12);
+}
+
+.variant-card span {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.variant-card strong {
+  font-size: 15px;
+}
+
+.variant-card p {
+  margin: 0;
+  color: #474239;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.variant-card ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .publish-card {
@@ -757,6 +806,68 @@ input[type="range"] {
 
 .risk-item.low {
   border-color: rgba(18, 102, 95, 0.3);
+}
+
+.evaluation-output {
+  display: grid;
+  gap: 14px;
+}
+
+.evaluation-summary {
+  margin: 0;
+  color: #474239;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.evaluation-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metric-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+}
+
+.metric-card header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.metric-card strong {
+  font-size: 14px;
+}
+
+.metric-card span {
+  color: var(--accent);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.metric-bar {
+  height: 7px;
+  margin: 10px 0;
+  border-radius: 999px;
+  background: #ece5d8;
+  overflow: hidden;
+}
+
+.metric-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.metric-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .toast {
@@ -812,6 +923,8 @@ input[type="range"] {
   .summary-strip,
   .storyboard,
   .breakdown-grid,
+  .variant-output,
+  .evaluation-grid,
   .video-preview,
   .field-grid {
     grid-template-columns: 1fr;
