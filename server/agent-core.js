@@ -170,6 +170,15 @@ function buildFallbackPackage(rawInputs = {}) {
     caption: index === 0 ? "爆款不是照抄，是拆结构" : index === shotCount - 1 ? "保存这个同款公式" : "换主题，保节奏，重写表达",
     prompt: `竖屏 9:16，${shot[1]}，${shot[2]}，干净真实的中文短视频质感，高对比但不过度夸张，避免出现知名品牌、真实名人和原视频专属元素。`,
   }));
+  const scores = {
+    similarity: `${inputs.similarity}%`,
+    safety: `${safety}/100`,
+    shots: `${shotCount}`,
+    shotReason,
+    difficulty,
+  };
+  const variants = buildVariants(inputs, platform);
+  const evaluation = buildEvaluation(inputs, scores, shotCount);
 
   return {
     provider: "local-fallback",
@@ -200,13 +209,71 @@ function buildFallbackPackage(rawInputs = {}) {
         body: "保留“钩子、过程、结果、行动”的结构，属于更适合产品化的原创改编方向。",
       },
     ],
-    scores: {
-      similarity: `${inputs.similarity}%`,
-      safety: `${safety}/100`,
-      shots: `${shotCount}`,
-      shotReason,
-      difficulty,
+    scores,
+    variants,
+    evaluation,
+  };
+}
+
+function buildVariants(inputs, platform) {
+  return [
+    {
+      id: "high_similarity",
+      name: "高相似版",
+      positioning: "最大程度保留参考视频的叙事顺序、切镜节奏和结果展示方式。",
+      bestFor: "追热点、做同款挑战、验证爆款结构是否适合自己的主题。",
+      tradeoff: "传播记忆点更接近参考视频，但原创安全分会下降，需要重写台词和画面元素。",
+      changes: [
+        "保留 0-3 秒强钩子结构",
+        "保留中段快切和前后对比",
+        `把核心内容替换为「${inputs.goal}」`,
+      ],
     },
+    {
+      id: "low_risk",
+      name: "低风险版",
+      positioning: "只复用爆款的底层公式，重写叙事角度、视觉风格、人物设定和 CTA。",
+      bestFor: "正式发布、品牌账号、需要降低搬运和侵权风险的内容。",
+      tradeoff: "和参考视频的表层相似度降低，短期热点借势感会弱一些。",
+      changes: [
+        "改写开头钩子为用户痛点",
+        "替换画面风格和人物设定",
+        "不用原音乐、原台词、原构图",
+      ],
+    },
+    {
+      id: "platform_fit",
+      name: "平台适配版",
+      positioning: `按${inputs.platform}的内容节奏重排脚本、标题和互动引导。`,
+      bestFor: `准备直接发布到${inputs.platform}，希望提升完播、收藏或评论互动。`,
+      tradeoff: "平台特征更强，迁移到其他平台前需要重新改标题和节奏。",
+      changes: [
+        `${inputs.platform}标题：${platform.title}`,
+        `评论/互动：${platform.cta}`,
+        "封面强调可收藏的同款公式",
+      ],
+    },
+  ];
+}
+
+function buildEvaluation(inputs, scores, shotCount) {
+  const similarity = Number(String(scores.similarity).replace("%", "")) || inputs.similarity;
+  const safety = Number(String(scores.safety).split("/")[0]) || 70;
+  const platformFit = inputs.platform === "抖音" || inputs.platform === "小红书" ? 86 : 78;
+  const promptUsability = Math.max(72, Math.min(92, 68 + shotCount * 2));
+  const productionCost = inputs.duration >= 60 ? 66 : shotCount > 9 ? 72 : 82;
+  const scriptReadiness = Math.max(70, Math.min(90, 94 - Math.abs(72 - similarity) / 2));
+
+  return {
+    summary: "当前方案适合先做脚本和分镜验证，再进入视频生成工具制作。发布前应优先改写画面元素、台词和音乐，避免被识别为搬运。",
+    metrics: [
+      { label: "结构复刻度", score: similarity, note: "衡量是否保留参考视频的钩子、节奏和叙事顺序。" },
+      { label: "原创安全分", score: safety, note: "分数越高，越不像直接搬运；低于 70 需要继续改写。" },
+      { label: "平台适配度", score: platformFit, note: `根据${inputs.platform}的节奏、标题和互动方式估算。` },
+      { label: "提示词可用性", score: promptUsability, note: "衡量分镜提示词是否足够具体，能否交给视频生成工具。" },
+      { label: "制作难度", score: productionCost, note: "分数越高越容易制作；镜头越多、时长越长，制作成本越高。" },
+      { label: "脚本可发布度", score: scriptReadiness, note: "衡量脚本是否有完整开头、过程、结果和行动引导。" },
+    ],
   };
 }
 
@@ -226,6 +293,26 @@ function normalizeAgentPackage(modelOutput, rawInputs = {}, provider = "model") 
     caption: String(shot.caption || fallback.shots[Math.min(index, fallback.shots.length - 1)].caption),
     prompt: String(shot.prompt || fallback.shots[Math.min(index, fallback.shots.length - 1)].prompt),
   }));
+  const variants = normalizeArray(source.variants, fallback.variants).map((variant, index) => {
+    const fallbackVariant = fallback.variants[Math.min(index, fallback.variants.length - 1)];
+    return {
+      id: String(variant.id || fallbackVariant.id),
+      name: String(variant.name || fallbackVariant.name),
+      positioning: String(variant.positioning || fallbackVariant.positioning),
+      bestFor: String(variant.bestFor || fallbackVariant.bestFor),
+      tradeoff: String(variant.tradeoff || fallbackVariant.tradeoff),
+      changes: normalizeArray(variant.changes, fallbackVariant.changes).map(String),
+    };
+  });
+  const metrics = normalizeArray(source.evaluation?.metrics, fallback.evaluation.metrics).map((metric, index) => {
+    const fallbackMetric = fallback.evaluation.metrics[Math.min(index, fallback.evaluation.metrics.length - 1)];
+    const score = Number(metric.score);
+    return {
+      label: String(metric.label || fallbackMetric.label),
+      score: Number.isFinite(score) ? Math.max(0, Math.min(100, Math.round(score))) : fallbackMetric.score,
+      note: String(metric.note || fallbackMetric.note),
+    };
+  });
 
   return {
     provider,
@@ -258,6 +345,11 @@ function normalizeAgentPackage(modelOutput, rawInputs = {}, provider = "model") 
       shotReason: String(source.scores?.shotReason || fallback.scores.shotReason),
       difficulty: String(source.scores?.difficulty || fallback.scores.difficulty),
     },
+    variants,
+    evaluation: {
+      summary: String(source.evaluation?.summary || fallback.evaluation.summary),
+      metrics,
+    },
   };
 }
 
@@ -268,8 +360,10 @@ function buildModelPrompt(inputs) {
     "任务：根据用户提供的爆款参考信息和改编目标，生成同款原创创意包。",
     "边界：不要帮助用户搬运、复用原视频音乐、完整台词、人物/IP/品牌。只复用结构、节奏和创意公式。",
     "必须只返回 JSON，不要 Markdown，不要代码块。",
-    "JSON 字段必须包含：breakdown, script, shots, publish, risk, scores。",
+    "JSON 字段必须包含：breakdown, script, shots, publish, risk, scores, variants, evaluation。",
     "shots 每项包含 title, visual, narration, caption, prompt。",
+    "variants 必须给出 high_similarity、low_risk、platform_fit 三个方案，每项包含 id, name, positioning, bestFor, tradeoff, changes。",
+    "evaluation.metrics 必须包含 6 个指标：结构复刻度、原创安全分、平台适配度、提示词可用性、制作难度、脚本可发布度；score 为 0-100 数字。",
     "risk 的 level 只能是 high, medium, low。",
     `用户输入：${JSON.stringify(cleaned, null, 2)}`,
   ].join("\n");
