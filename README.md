@@ -41,6 +41,8 @@ TrendClone Agent 是一个面向 AI 视频创作者、短视频运营和小商�
 - 输出原创风险检测
 - 输出三种创意方案：高相似版、低风险版、平台适配版
 - 输出 Agent 评测面板：结构复刻度、原创安全分、平台适配度、提示词可用性、制作难度、脚本可发布度
+- 多页面 UI：工作台、样本库、评测报告、项目文档
+- 内置 AI 爆款视频样本库，支持一键套用样本到生成流程
 - 模拟成片预览和镜头合成队列
 - 复制报告
 - 导出 JSON 制作包
@@ -105,12 +107,17 @@ PORT=5179
 ├── .env.example
 ├── server
 │   └── agent-core.js
+│   └── sample-library.js
 ├── tests
 │   └── agent-core.test.js
+│   └── sample-library.test.js
 ├── docs
 │   ├── trendclone-prd.md
-│   └── competitor-analysis.md
+│   ├── competitor-analysis.md
+│   ├── evaluation-report.md
+│   └── visual-asset-prompts.md
 ├── data
+│   ├── sample-library.json
 │   └── video-sample-library-template.csv
 └── trendclone-mvp-final.png
 ```

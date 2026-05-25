@@ -114,27 +114,35 @@
           </div>
         </header>
 
-        <section class="summary-strip" aria-label="关键评分">
-          <article>
-            <span>结构相似度</span>
-            <strong id="scoreSimilarity">--</strong>
-          </article>
-          <article>
-            <span>原创安全分</span>
-            <strong id="scoreSafety">--</strong>
-          </article>
-          <article>
-            <span>生成镜头</span>
-            <strong id="scoreShots">--</strong>
-            <small id="scoreShotReason">--</small>
-          </article>
-          <article>
-            <span>制作难度</span>
-            <strong id="scoreDifficulty">--</strong>
-          </article>
-        </section>
+        <nav class="workspace-tabs" aria-label="页面导航">
+          <button class="tab-button active" type="button" data-view="studio">工作台</button>
+          <button class="tab-button" type="button" data-view="library">样本库</button>
+          <button class="tab-button" type="button" data-view="report">评测报告</button>
+          <button class="tab-button" type="button" data-view="docs">项目文档</button>
+        </nav>
 
-        <div class="workspace-grid">
+        <section id="view-studio" class="view-section active" data-view-section="studio">
+          <section class="summary-strip" aria-label="关键评分">
+            <article>
+              <span>结构相似度</span>
+              <strong id="scoreSimilarity">--</strong>
+            </article>
+            <article>
+              <span>原创安全分</span>
+              <strong id="scoreSafety">--</strong>
+            </article>
+            <article>
+              <span>生成镜头</span>
+              <strong id="scoreShots">--</strong>
+              <small id="scoreShotReason">--</small>
+            </article>
+            <article>
+              <span>制作难度</span>
+              <strong id="scoreDifficulty">--</strong>
+            </article>
+          </section>
+
+          <div class="workspace-grid">
           <section class="output-panel wide">
             <div class="panel-heading">
               <h3>创意方案版本</h3>
@@ -227,7 +235,68 @@
               <p>生成后会展示结构复刻度、原创安全分、平台适配度、提示词可用性、制作难度和脚本可发布度。</p>
             </div>
           </section>
-        </div>
+          </div>
+        </section>
+
+        <section id="view-library" class="view-section" data-view-section="library">
+          <div class="page-panel">
+            <div class="page-heading">
+              <div>
+                <p class="section-kicker">Sample Library</p>
+                <h3>AI 爆款视频样本库</h3>
+              </div>
+              <span id="sampleCount">0 条样本</span>
+            </div>
+            <div id="sampleLibrary" class="sample-library empty-state">
+              <p>正在加载样本库。</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-report" class="view-section" data-view-section="report">
+          <div class="page-panel">
+            <div class="page-heading">
+              <div>
+                <p class="section-kicker">Evaluation</p>
+                <h3>评测与迭代记录</h3>
+              </div>
+            </div>
+            <div id="reportView" class="report-view"></div>
+          </div>
+        </section>
+
+        <section id="view-docs" class="view-section" data-view-section="docs">
+          <div class="page-panel docs-panel">
+            <div class="page-heading">
+              <div>
+                <p class="section-kicker">Portfolio</p>
+                <h3>作品集交付物</h3>
+              </div>
+            </div>
+            <div class="doc-grid">
+              <article>
+                <span>PRD</span>
+                <strong>产品需求文档</strong>
+                <p>包含用户、场景、功能边界、指标体系和 V1/V2/V3 规划。</p>
+              </article>
+              <article>
+                <span>Competitors</span>
+                <strong>竞品分析</strong>
+                <p>对比剪映、可灵、Runway、即梦等工具，突出创意 Agent 差异化。</p>
+              </article>
+              <article>
+                <span>Dataset</span>
+                <strong>样本库</strong>
+                <p>沉淀爆款视频钩子、叙事结构、视觉风格、可复刻点和风险元素。</p>
+              </article>
+              <article>
+                <span>Evaluation</span>
+                <strong>评测体系</strong>
+                <p>用结构复刻度、原创安全分、平台适配度等指标解释 Agent 质量。</p>
+              </article>
+            </div>
+          </div>
+        </section>
       </section>
     </main>
 

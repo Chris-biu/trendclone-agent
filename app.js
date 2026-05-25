@@ -4,6 +4,7 @@ const state = {
   lastPackage: null,
   videoFileName: "",
   activeVariantId: "high_similarity",
+  samples: [],
 };
 
 const archetypes = [
@@ -532,6 +533,110 @@ function simulateVideo() {
   }, 650);
 }
 
+function switchView(view) {
+  document.querySelectorAll("[data-view-section]").forEach((section) => {
+    section.classList.toggle("active", section.dataset.viewSection === view);
+  });
+  document.querySelectorAll("[data-view]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.view === view);
+  });
+}
+
+function initNavigation() {
+  document.querySelectorAll("[data-view]").forEach((button) => {
+    button.addEventListener("click", () => switchView(button.dataset.view));
+  });
+}
+
+async function loadSampleLibrary() {
+  try {
+    const response = await fetch("./data/sample-library.json");
+    if (!response.ok) throw new Error(`sample library ${response.status}`);
+    state.samples = await response.json();
+    renderSampleLibrary(state.samples);
+    renderReportView(state.samples);
+  } catch (error) {
+    $("#sampleLibrary").className = "sample-library empty-state";
+    $("#sampleLibrary").innerHTML = `<p>样本库加载失败：${error.message}</p>`;
+  }
+}
+
+function renderSampleLibrary(samples) {
+  $("#sampleCount").textContent = `${samples.length} 条样本`;
+  $("#sampleLibrary").className = "sample-library";
+  $("#sampleLibrary").innerHTML = samples
+    .map(
+      (sample) => `
+        <article class="sample-card">
+          <header>
+            <span>${sample.platform} · ${sample.topicCategory}</span>
+            <strong>${sample.title}</strong>
+            <div class="sample-meta">
+              <b>${sample.duration}s</b>
+              <b>${sample.pacing}</b>
+              <b>${sample.cloneDifficulty}</b>
+            </div>
+          </header>
+          <p><b>钩子：</b>${sample.openingHook}</p>
+          <p><b>结构：</b>${sample.narrativeStructure}</p>
+          <p><b>可复刻：</b>${sample.reusableStructure}</p>
+          <button type="button" data-sample-id="${sample.id}">套用这个样本</button>
+        </article>
+      `,
+    )
+    .join("");
+  document.querySelectorAll("[data-sample-id]").forEach((button) => {
+    button.addEventListener("click", () => applySample(button.dataset.sampleId));
+  });
+}
+
+function applySample(sampleId) {
+  const sample = state.samples.find((item) => item.id === sampleId);
+  if (!sample) return;
+  $("#referenceLink").value = "";
+  $("#referenceText").value = [
+    `开头钩子：${sample.openingHook}`,
+    `叙事结构：${sample.narrativeStructure}`,
+    `视觉风格：${sample.visualStyle}`,
+    `节奏：${sample.pacing}`,
+    `情绪触发：${sample.emotionTrigger}`,
+    `可复刻结构：${sample.reusableStructure}`,
+    `提示词模式：${sample.reusablePromptPattern}`,
+    `高风险元素：${sample.highRiskElements.join("、")}`,
+    `改编角度：${sample.adaptationAngle}`,
+  ].join("\n");
+  $("#goal").value = sample.adaptationAngle;
+  $("#audience").value = sample.targetAudience;
+  $("#platform").value = sample.platform;
+  $("#duration").value = sample.duration > 45 ? "60" : sample.duration > 20 ? "30" : "15";
+  $("#shotCount").value = "auto";
+  switchView("studio");
+  showToast(`已套用样本：${sample.title}`);
+}
+
+function renderReportView(samples) {
+  const platforms = new Set(samples.map((sample) => sample.platform));
+  const categories = new Set(samples.map((sample) => sample.topicCategory));
+  const avgDuration = Math.round(samples.reduce((sum, sample) => sum + Number(sample.duration || 0), 0) / Math.max(samples.length, 1));
+  const formulas = [
+    "结果先行：先给成片效果，再解释过程",
+    "前后对比：用普通素材和 AI 成品制造反差",
+    "三步教程：把复杂创作压缩成可保存步骤",
+    "平台适配：根据发布平台重排标题、节奏和 CTA",
+  ];
+  $("#reportView").innerHTML = `
+    <div class="report-grid">
+      <article class="report-card"><strong>${samples.length}</strong><span>样本数量</span></article>
+      <article class="report-card"><strong>${platforms.size}</strong><span>覆盖平台</span></article>
+      <article class="report-card"><strong>${categories.size}</strong><span>内容类型</span></article>
+      <article class="report-card"><strong>${avgDuration}s</strong><span>平均时长</span></article>
+    </div>
+    <ul class="report-list">
+      ${formulas.map((formula) => `<li>${formula}</li>`).join("")}
+    </ul>
+  `;
+}
+
 $("#similarity").addEventListener("input", (event) => {
   $("#similarityValue").textContent = `${event.target.value}%`;
 });
@@ -549,4 +654,6 @@ $("#copyReport").addEventListener("click", copyReport);
 $("#exportJson").addEventListener("click", exportJson);
 $("#simulateVideo").addEventListener("click", simulateVideo);
 
+initNavigation();
+loadSampleLibrary();
 generate();
