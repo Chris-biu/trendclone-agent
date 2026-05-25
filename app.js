@@ -3,6 +3,7 @@ const $ = (selector) => document.querySelector(selector);
 const state = {
   lastPackage: null,
   videoFileName: "",
+  activeVariantId: "high_similarity",
 };
 
 const archetypes = [
@@ -285,6 +286,40 @@ function renderStoryboard(shots) {
     .join("");
 }
 
+function renderVariants(variants = []) {
+  const safeVariants = variants.length ? variants : [
+    {
+      id: "high_similarity",
+      name: "高相似版",
+      positioning: "保留参考视频结构和节奏。",
+      bestFor: "追热点。",
+      tradeoff: "需要控制原创风险。",
+      changes: ["保留结构", "重写台词", "替换画面"],
+    },
+  ];
+  $("#variantOutput").className = "variant-output";
+  $("#variantOutput").innerHTML = safeVariants
+    .map(
+      (variant) => `
+        <button class="variant-card ${variant.id === state.activeVariantId ? "active" : ""}" type="button" data-variant-id="${variant.id}">
+          <span>${variant.name}</span>
+          <strong>${variant.positioning}</strong>
+          <p><b>适合：</b>${variant.bestFor}</p>
+          <p><b>取舍：</b>${variant.tradeoff}</p>
+          <ul>${(variant.changes || []).map((change) => `<li>${change}</li>`).join("")}</ul>
+        </button>
+      `,
+    )
+    .join("");
+  document.querySelectorAll("[data-variant-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.activeVariantId = button.dataset.variantId;
+      renderVariants(state.lastPackage?.variants || safeVariants);
+      showToast(`已选择：${button.querySelector("span").textContent}`);
+    });
+  });
+}
+
 function renderVideoPreview(result, simulated = false) {
   const leadShot = result.shots[0];
   $("#videoPreview").className = "video-preview";
@@ -349,6 +384,35 @@ function renderRisk(risks) {
     .join("");
 }
 
+function renderEvaluation(evaluation) {
+  if (!evaluation || !Array.isArray(evaluation.metrics)) {
+    $("#evaluationOutput").className = "evaluation-output empty-state";
+    $("#evaluationOutput").innerHTML = "<p>暂无评测数据。</p>";
+    return;
+  }
+  $("#evaluationOutput").className = "evaluation-output";
+  $("#evaluationOutput").innerHTML = `
+    <p class="evaluation-summary">${evaluation.summary}</p>
+    <div class="evaluation-grid">
+      ${evaluation.metrics
+        .map((metric) => {
+          const score = Math.max(0, Math.min(100, Number(metric.score) || 0));
+          return `
+            <article class="metric-card">
+              <header>
+                <strong>${metric.label}</strong>
+                <span>${score}</span>
+              </header>
+              <div class="metric-bar"><i style="width: ${score}%"></i></div>
+              <p>${metric.note}</p>
+            </article>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
 function renderScores(scores) {
   $("#scoreSimilarity").textContent = scores.similarity;
   $("#scoreSafety").textContent = scores.safety;
@@ -394,13 +458,16 @@ async function generate() {
   try {
     const result = await requestAgentPackage(inputs);
     state.lastPackage = result;
+    state.activeVariantId = result.variants?.[0]?.id || "high_similarity";
     renderScores(result.scores);
+    renderVariants(result.variants);
     renderBreakdown(result.breakdown);
     renderScript(result.script);
     renderStoryboard(result.shots);
     renderVideoPreview(result);
     renderPublish(result.publish);
     renderRisk(result.risk);
+    renderEvaluation(result.evaluation);
     const providerLabel = result.provider && result.provider !== "local-fallback" && result.provider !== "browser-fallback" ? result.provider : "本地回退";
     $("#agentStatus").textContent = `已生成 · ${providerLabel}`;
     $(".status-line").classList.add("ready");
