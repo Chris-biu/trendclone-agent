@@ -25,6 +25,13 @@ test("buildFallbackPackage returns a complete creative package with dynamic shot
   assert.ok(result.script.length >= 5);
   assert.ok(result.publish.title.length > 0);
   assert.ok(result.risk.length >= 3);
+  assert.equal(result.variants.length, 3);
+  assert.deepEqual(
+    result.variants.map((variant) => variant.id),
+    ["high_similarity", "low_risk", "platform_fit"],
+  );
+  assert.equal(result.evaluation.metrics.length, 6);
+  assert.ok(result.evaluation.summary.length > 0);
 });
 
 test("normalizeAgentPackage repairs model output into the required schema", () => {
@@ -54,6 +61,20 @@ test("normalizeAgentPackage repairs model output into the required schema", () =
         shotReason: "模型判断需要 1 个核心镜头",
         difficulty: "低",
       },
+      variants: [
+        {
+          id: "high_similarity",
+          name: "高相似版",
+          positioning: "保留节奏",
+          bestFor: "追热点",
+          tradeoff: "风险更高",
+          changes: ["保留结构"],
+        },
+      ],
+      evaluation: {
+        summary: "整体可用",
+        metrics: [{ label: "结构复刻度", score: 88, note: "结构清晰" }],
+      },
     },
     {
       goal: "AI 视频工具",
@@ -70,4 +91,7 @@ test("normalizeAgentPackage repairs model output into the required schema", () =
   assert.equal(result.publish.tags[0], "AI视频");
   assert.equal(result.scores.shots, "1");
   assert.equal(result.inputs.goal, "AI 视频工具");
+  assert.equal(result.variants.length, 1);
+  assert.equal(result.variants[0].id, "high_similarity");
+  assert.equal(result.evaluation.metrics[0].score, 88);
 });
