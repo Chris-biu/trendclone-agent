@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#mainWorkspace">跳到主工作区</a>
     <main class="app-shell app-shell-pages">
       <aside class="app-nav" aria-label="主导航">
         <div class="brand">
@@ -59,6 +60,10 @@
             <span>09</span>
             项目文档
           </button>
+          <button class="nav-item" type="button" data-view="audit">
+            <span>10</span>
+            工业自审
+          </button>
         </nav>
 
         <div class="nav-status">
@@ -70,15 +75,45 @@
         </div>
       </aside>
 
-      <section class="workspace page-workspace" aria-label="主工作区">
+      <section id="mainWorkspace" class="workspace page-workspace" aria-label="主工作区">
         <header class="page-hero">
-          <div>
+          <div class="hero-copy">
             <p class="section-kicker">TrendClone Agent</p>
             <h2>把一个爆款视频拆成可复用的原创制作方案</h2>
+            <p class="hero-subtitle">面向 AI 视频创作者的结构迁移工作台：先拆爆款节奏，再生成脚本、分镜、提示词、发布文案和原创风险评测。</p>
+            <div class="hero-quick-stats" aria-label="产品能力概览">
+              <span>10 个功能页</span>
+              <span>3 套改编策略</span>
+              <span>6 维评测指标</span>
+              <span>安全改编导向</span>
+            </div>
           </div>
-          <div class="hero-meter">
-            <span>Agent Flow</span>
-            <strong>9 pages</strong>
+          <div class="hero-composition" aria-label="AI 视频创作工作台视觉预览">
+            <div class="film-strip" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div class="cinema-frame">
+              <div class="frame-toolbar">
+                <span>Scene Map</span>
+                <strong>原创安全分 82</strong>
+              </div>
+              <div class="frame-stage">
+                <div class="stage-subject">
+                  <span>AI</span>
+                  <strong>Trend Structure</strong>
+                </div>
+                <div class="stage-caption">Hook -> Proof -> Remix -> Publish</div>
+              </div>
+              <div class="frame-timeline">
+                <i style="width: 28%"></i>
+                <i style="width: 42%"></i>
+                <i style="width: 18%"></i>
+              </div>
+            </div>
+            <div class="hero-meter">
+              <span>Agent Flow</span>
+              <strong>10 pages</strong>
+            </div>
           </div>
         </header>
 
@@ -114,11 +149,12 @@
 
             <section>
               <div class="page-heading compact">
-                <div>
-                  <p class="section-kicker">Target</p>
-                  <h3>改编目标</h3>
-                </div>
+              <div>
+                <p class="section-kicker">Target</p>
+                <h3>改编目标</h3>
               </div>
+              <button id="quickGenerateBtn" class="mini-action" type="button">生成</button>
+            </div>
 
               <label for="goal">我要推广</label>
               <input id="goal" type="text" value="一款帮助大学生做 AI 视频作业的工具" />
@@ -367,6 +403,7 @@
                 <h3>视觉素材与生成提示词</h3>
               </div>
             </div>
+            <p class="asset-lead">素材页不是装饰仓库，而是给作品集补齐视觉生产链路：主视觉、竖屏预览、样本缩略图和空状态都能被统一生成，保证项目从产品到视觉交付是一套系统。</p>
             <div class="asset-workbench">
               <section class="asset-preview-stage" aria-label="视觉素材占位">
                 <div class="asset-screen">
@@ -395,6 +432,10 @@
                 <h3>作品集交付物</h3>
               </div>
             </div>
+            <div class="release-note">
+              <strong>当前版本结论</strong>
+              <p>已达到面试作品集演示标准：能讲清楚用户、工作流、Agent 输出、评测体系和下一阶段上线缺口。真实商业上线仍需要补齐视频解析、账号体系、任务持久化和 MP4 合成链路。</p>
+            </div>
             <div id="reportView" class="report-view"></div>
             <div class="doc-grid">
               <article>
@@ -417,6 +458,78 @@
                 <strong>评测体系</strong>
                 <p>用结构复刻度、原创安全分、平台适配度等指标解释 Agent 质量。</p>
               </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-audit" class="view-section" data-view-section="audit">
+          <div class="page-panel audit-panel">
+            <div class="page-heading">
+              <div>
+                <p class="section-kicker">Product Review</p>
+                <h3>工业级自审面板</h3>
+              </div>
+              <span>PM Review</span>
+            </div>
+            <div class="audit-console">
+              <article class="audit-verdict">
+                <span>Release Verdict</span>
+                <strong>作品集可演示，商业化待补齐</strong>
+                <p>从产品经理视角，当前最重要的不是继续堆功能，而是让用户清楚知道：输入什么、Agent 如何拆解、输出能不能直接进入制作、哪里存在原创风险。</p>
+              </article>
+              <article class="audit-priority">
+                <span>Next Sprint</span>
+                <ol>
+                  <li>接入关键帧、字幕和旁白抽取，减少用户手填。</li>
+                  <li>增加项目历史与版本对比，让同一爆款结构可持续迭代。</li>
+                  <li>对接视频生成或合成服务，把分镜包变成可下载成片。</li>
+                </ol>
+              </article>
+            </div>
+            <div class="audit-grid">
+              <article class="audit-card strong">
+                <span>美术层次</span>
+                <strong>A-</strong>
+                <p>暗场画布、电影监视器、时间线、胶片条、层叠面板已经形成可识别的 AI 视频创作气质。</p>
+              </article>
+              <article class="audit-card">
+                <span>效能体验</span>
+                <strong>B+</strong>
+                <p>本地回退、网页 API 配置、JSON 导出、样本套用已可演示；页面加载不再自动消耗 API 额度。</p>
+              </article>
+              <article class="audit-card">
+                <span>功能完整度</span>
+                <strong>B+</strong>
+                <p>覆盖输入、策略、脚本、分镜、预览、风控、评测、样本库和视觉资产提示词。</p>
+              </article>
+              <article class="audit-card warning">
+                <span>上线缺口</span>
+                <strong>4 项</strong>
+                <p>真实视频解析、用户账号、任务持久化、视频生成/合成 API 仍需要在下一阶段补齐。</p>
+              </article>
+            </div>
+            <div class="launch-checklist">
+              <article>
+                <h4>已达到作品集演示标准</h4>
+                <ul>
+                  <li>多页面工作流清晰，面试官可以按产品链路浏览。</li>
+                  <li>Agent 输出结构完整，能解释输入、推理、输出和评测闭环。</li>
+                  <li>视觉风格与 AI 视频创作场景一致，不再像普通表单 Demo。</li>
+                </ul>
+              </article>
+              <article>
+                <h4>距离真实上线还需要</h4>
+                <ul>
+                  <li>接入 ASR/OCR/关键帧抽取，减少手动输入。</li>
+                  <li>增加历史记录、项目空间和版本对比。</li>
+                  <li>接视频生成与 FFmpeg 合成服务，输出可下载 MP4。</li>
+                </ul>
+              </article>
+            </div>
+            <div class="audit-pipeline" aria-label="自审迭代闭环">
+              <span>自审闭环</span>
+              <strong>视觉质感 -> 生成效能 -> 风险控制 -> 上线缺口</strong>
+              <p>每次迭代都从这四个维度检查，不把“像 Demo”当作可接受状态，也不把高相似复刻包装成无风险原创。</p>
             </div>
           </div>
         </section>

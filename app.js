@@ -17,7 +17,7 @@ const visualPrompts = [
     title: "产品主视觉",
     usage: "用于作品集展示、README 封面和工作台顶部视觉。",
     prompt:
-      "一张 16:9 横版产品主视觉，主题是 AI 短视频创意工作台。画面中有一个现代化桌面界面，左侧是爆款视频样本，右侧是分镜、脚本、提示词和评测指标面板。风格专业、干净、有产品设计感，适合 SaaS 工具展示。配色以白色、深墨色、青绿色、少量蓝色和金色点缀为主，不要紫色渐变，不要卡通人物，不要夸张科幻，不要出现真实品牌 logo，不要生成文字。",
+      "一张 16:9 横版电影级产品主视觉，主题是 AI 短视频创意指挥室。暗场环境里有一块大型视频监视器、分镜时间线、脚本卡片、提示词面板和原创风险评分仪表，界面有电影调色台和剪辑工作台的层次感。风格高级、克制、工业级 SaaS 产品展示感。配色以深墨黑、暖白、青绿色、少量琥珀金和冷蓝点缀为主，不要紫色渐变，不要卡通人物，不要真实品牌 logo，不要可读文字。",
   },
   {
     id: "preview",
@@ -25,7 +25,7 @@ const visualPrompts = [
     title: "竖屏视频预览占位图",
     usage: "用于成片预览页的手机画面。",
     prompt:
-      "一张 9:16 竖屏短视频封面，占位图风格，主题是 AI 生成短视频成片预览。画面包含抽象的分镜卡片、手机短视频界面、播放进度线和柔和光影。专业、简洁、适合产品 Demo，不要真实人物，不要品牌 logo，不要可读文字，不要复杂背景。",
+      "一张 9:16 竖屏短视频封面，占位图风格，主题是 AI 生成短视频成片预览。画面像电影监视器里的竖屏成片，包含抽象分镜卡片、播放进度线、景深光影和轻微胶片颗粒。专业、简洁、有高级视频工具质感，不要真实人物，不要品牌 logo，不要可读文字，不要复杂背景。",
   },
   {
     id: "samples",
@@ -42,6 +42,14 @@ const visualPrompts = [
     usage: "用于未生成创意包时的空状态。",
     prompt:
       "一张简洁的空状态插画，主题是等待 AI 分析视频结构。画面中有一个空白分镜板、一个上传视频图标、几条淡色分析线。风格克制、专业、轻量，适合 Web App 空状态，不要人物，不要文字，不要炫光，不要紫色。",
+  },
+  {
+    id: "audit",
+    type: "16:9 产品自审页背景",
+    title: "工业自审视觉背景",
+    usage: "用于工业自审页或项目复盘材料，强化产品经理自审与上线评估感。",
+    prompt:
+      "一张 16:9 电影感产品复盘背景图，主题是 AI 视频 Agent 的工业级自审控制室。画面包含深色产品仪表盘、质量评分卡、上线缺口清单、风险雷达和视频时间线，像专业影视后期监看室与 SaaS 数据指挥台的结合。色彩使用深墨黑、暖白、青绿色、少量琥珀金和冷蓝点缀，有层次、有光影、有玻璃和金属质感。不要真实品牌 logo，不要可读文字，不要卡通人物，不要紫色渐变。",
   },
 ];
 
@@ -683,6 +691,7 @@ function switchView(view) {
   document.querySelectorAll("[data-view]").forEach((button) => {
     button.classList.toggle("active", button.dataset.view === view);
   });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function initNavigation() {
@@ -917,6 +926,7 @@ $("#videoFile").addEventListener("change", (event) => {
 });
 
 $("#generateBtn").addEventListener("click", generate);
+$("#quickGenerateBtn").addEventListener("click", generate);
 $("#copyReport").addEventListener("click", copyReport);
 $("#exportJson").addEventListener("click", exportJson);
 $("#simulateVideo").addEventListener("click", simulateVideo);
@@ -929,4 +939,3 @@ renderVisualPrompts();
 applyModelConfigToForm(readStoredModelConfig());
 loadModelStatus();
 loadSampleLibrary();
-generate();
