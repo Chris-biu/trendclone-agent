@@ -454,7 +454,7 @@ async function generate() {
   }
 
   $("#agentStatus").textContent = "生成中";
-  $(".status-line").classList.remove("ready");
+  $(".nav-status").classList.remove("ready");
 
   try {
     const result = await requestAgentPackage(inputs);
@@ -471,7 +471,8 @@ async function generate() {
     renderEvaluation(result.evaluation);
     const providerLabel = result.provider && result.provider !== "local-fallback" && result.provider !== "browser-fallback" ? result.provider : "本地回退";
     $("#agentStatus").textContent = `已生成 · ${providerLabel}`;
-    $(".status-line").classList.add("ready");
+    $(".nav-status").classList.add("ready");
+    switchView("strategy");
     showToast(result.warning ? `已使用本地回退：${result.warning}` : "同款创意包已生成，可继续调整相似度和平台。");
   } catch (error) {
     $("#agentStatus").textContent = "生成失败";
@@ -524,11 +525,11 @@ function simulateVideo() {
     return;
   }
   $("#agentStatus").textContent = "模拟合成中";
-  $(".status-line").classList.remove("ready");
+  $(".nav-status").classList.remove("ready");
   window.setTimeout(() => {
     renderVideoPreview(state.lastPackage, true);
     $("#agentStatus").textContent = "已生成预览";
-    $(".status-line").classList.add("ready");
+    $(".nav-status").classList.add("ready");
     showToast("已完成模拟合成。真实 MP4 版本需要接视频生成 API 和合成服务。");
   }, 650);
 }
@@ -610,7 +611,7 @@ function applySample(sampleId) {
   $("#platform").value = sample.platform;
   $("#duration").value = sample.duration > 45 ? "60" : sample.duration > 20 ? "30" : "15";
   $("#shotCount").value = "auto";
-  switchView("studio");
+  switchView("setup");
   showToast(`已套用样本：${sample.title}`);
 }
 

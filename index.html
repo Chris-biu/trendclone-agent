@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="app-shell">
-      <aside class="control-panel" aria-label="输入区">
+    <main class="app-shell app-shell-pages">
+      <aside class="app-nav" aria-label="主导航">
         <div class="brand">
           <div class="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" role="img">
@@ -17,111 +17,163 @@
             </svg>
           </div>
           <div>
-            <h1>TrendClone Agent</h1>
-            <p>爆款视频结构复刻与原创改编工具</p>
+            <h1>TrendClone</h1>
+            <p>爆款结构复刻 Agent</p>
           </div>
         </div>
 
-        <section class="panel-section">
-          <h2>爆款参考</h2>
-          <label class="upload-box" for="videoFile">
-            <input id="videoFile" type="file" accept="video/*" />
-            <span class="upload-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 15V4" />
-                <path d="m7 9 5-5 5 5" />
-                <path d="M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15" />
-              </svg>
-            </span>
-            <strong>上传参考视频</strong>
-            <small id="fileStatus">支持本地 MP4/MOV，初版只读取文件信息</small>
-          </label>
-
-          <label for="referenceLink">或粘贴视频链接</label>
-          <input id="referenceLink" type="url" placeholder="https://www.douyin.com/video/..." />
-
-          <label for="referenceText">补充文案/字幕/观察</label>
-          <textarea id="referenceText" rows="5">开头用强反差画面吸引注意，中段展示 AI 生成过程，结尾展示成品效果并引导评论。</textarea>
-        </section>
-
-        <section class="panel-section">
-          <h2>改编目标</h2>
-          <label for="goal">我要推广</label>
-          <input id="goal" type="text" value="一款帮助大学生做 AI 视频作业的工具" />
-
-          <label for="audience">目标人群</label>
-          <input id="audience" type="text" value="想做自媒体但不会写脚本的大学生" />
-
-            <div class="field-grid">
-              <div>
-                <label for="platform">发布平台</label>
-                <select id="platform">
-                  <option>抖音</option>
-                <option>小红书</option>
-                <option>视频号</option>
-                <option>B 站</option>
-              </select>
-            </div>
-            <div>
-              <label for="duration">视频时长</label>
-              <select id="duration">
-                <option value="15">15 秒</option>
-                  <option value="30" selected>30 秒</option>
-                  <option value="60">60 秒</option>
-                </select>
-              </div>
-              <div>
-                <label for="shotCount">镜头数量</label>
-                <select id="shotCount">
-                  <option value="auto" selected>AI 自动判断</option>
-                  <option value="5">5 个镜头</option>
-                  <option value="7">7 个镜头</option>
-                  <option value="9">9 个镜头</option>
-                  <option value="12">12 个镜头</option>
-                </select>
-              </div>
-            </div>
-
-          <fieldset>
-            <legend>相似度策略</legend>
-            <label class="range-label" for="similarity">
-              <span>结构贴近度</span>
-              <strong id="similarityValue">72%</strong>
-            </label>
-            <input id="similarity" type="range" min="30" max="90" value="72" />
-            <div class="range-note">建议保留结构，降低台词、人物、音乐和画面元素相似度。</div>
-          </fieldset>
-
-          <button id="generateBtn" class="primary-action" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 12h14" />
-              <path d="m13 6 6 6-6 6" />
-            </svg>
-            生成同款创意包
+        <nav class="side-nav" aria-label="功能页面">
+          <button class="nav-item active" type="button" data-view="setup">
+            <span>01</span>
+            创作设置
           </button>
-        </section>
+          <button class="nav-item" type="button" data-view="strategy">
+            <span>02</span>
+            方案策略
+          </button>
+          <button class="nav-item" type="button" data-view="script">
+            <span>03</span>
+            脚本发布
+          </button>
+          <button class="nav-item" type="button" data-view="storyboard">
+            <span>04</span>
+            分镜提示词
+          </button>
+          <button class="nav-item" type="button" data-view="preview">
+            <span>05</span>
+            成片预览
+          </button>
+          <button class="nav-item" type="button" data-view="evaluation">
+            <span>06</span>
+            评测风控
+          </button>
+          <button class="nav-item" type="button" data-view="library">
+            <span>07</span>
+            样本库
+          </button>
+          <button class="nav-item" type="button" data-view="docs">
+            <span>08</span>
+            项目文档
+          </button>
+        </nav>
+
+        <div class="nav-status">
+          <span class="status-dot"></span>
+          <div>
+            <strong id="agentStatus">等待输入</strong>
+            <small>生成后按左侧步骤查看结果</small>
+          </div>
+        </div>
       </aside>
 
-      <section class="workspace" aria-label="输出区">
-        <header class="workspace-header">
+      <section class="workspace page-workspace" aria-label="主工作区">
+        <header class="page-hero">
           <div>
-            <p class="section-kicker">Agent 工作台</p>
-            <h2>从爆款拆解到可制作脚本</h2>
+            <p class="section-kicker">TrendClone Agent</p>
+            <h2>把一个爆款视频拆成可复用的原创制作方案</h2>
           </div>
-          <div class="status-line">
-            <span class="status-dot"></span>
-            <span id="agentStatus">等待输入</span>
+          <div class="hero-meter">
+            <span>Agent Flow</span>
+            <strong>8 pages</strong>
           </div>
         </header>
 
-        <nav class="workspace-tabs" aria-label="页面导航">
-          <button class="tab-button active" type="button" data-view="studio">工作台</button>
-          <button class="tab-button" type="button" data-view="library">样本库</button>
-          <button class="tab-button" type="button" data-view="report">评测报告</button>
-          <button class="tab-button" type="button" data-view="docs">项目文档</button>
-        </nav>
+        <section id="view-setup" class="view-section active" data-view-section="setup">
+          <div class="page-panel setup-layout">
+            <section>
+              <div class="page-heading">
+                <div>
+                  <p class="section-kicker">Step 01</p>
+                  <h3>创作设置</h3>
+                </div>
+              </div>
 
-        <section id="view-studio" class="view-section active" data-view-section="studio">
+              <label class="upload-box" for="videoFile">
+                <input id="videoFile" type="file" accept="video/*" />
+                <span class="upload-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 15V4" />
+                    <path d="m7 9 5-5 5 5" />
+                    <path d="M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15" />
+                  </svg>
+                </span>
+                <strong>上传参考视频</strong>
+                <small id="fileStatus">支持本地 MP4/MOV，当前版本读取文件信息</small>
+              </label>
+
+              <label for="referenceLink">或粘贴视频链接</label>
+              <input id="referenceLink" type="url" placeholder="https://www.douyin.com/video/..." />
+
+              <label for="referenceText">参考视频观察</label>
+              <textarea id="referenceText" rows="7">开头用强反差画面吸引注意，中段展示 AI 生成过程，结尾展示成品效果并引导评论。</textarea>
+            </section>
+
+            <section>
+              <div class="page-heading compact">
+                <div>
+                  <p class="section-kicker">Target</p>
+                  <h3>改编目标</h3>
+                </div>
+              </div>
+
+              <label for="goal">我要推广</label>
+              <input id="goal" type="text" value="一款帮助大学生做 AI 视频作业的工具" />
+
+              <label for="audience">目标人群</label>
+              <input id="audience" type="text" value="想做自媒体但不会写脚本的大学生" />
+
+              <div class="field-grid">
+                <div>
+                  <label for="platform">发布平台</label>
+                  <select id="platform">
+                    <option>抖音</option>
+                    <option>小红书</option>
+                    <option>视频号</option>
+                    <option>B 站</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="duration">视频时长</label>
+                  <select id="duration">
+                    <option value="15">15 秒</option>
+                    <option value="30" selected>30 秒</option>
+                    <option value="60">60 秒</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="shotCount">镜头数量</label>
+                  <select id="shotCount">
+                    <option value="auto" selected>AI 自动判断</option>
+                    <option value="5">5 个镜头</option>
+                    <option value="7">7 个镜头</option>
+                    <option value="9">9 个镜头</option>
+                    <option value="12">12 个镜头</option>
+                  </select>
+                </div>
+              </div>
+
+              <fieldset>
+                <legend>相似度策略</legend>
+                <label class="range-label" for="similarity">
+                  <span>结构贴近度</span>
+                  <strong id="similarityValue">72%</strong>
+                </label>
+                <input id="similarity" type="range" min="30" max="90" value="72" />
+                <div class="range-note">建议保留结构，降低台词、人物、音乐和画面元素相似度。</div>
+              </fieldset>
+
+              <button id="generateBtn" class="primary-action" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h14" />
+                  <path d="m13 6 6 6-6 6" />
+                </svg>
+                生成创意包
+              </button>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-strategy" class="view-section" data-view-section="strategy">
           <section class="summary-strip" aria-label="关键评分">
             <article>
               <span>结构相似度</span>
@@ -142,42 +194,57 @@
             </article>
           </section>
 
-          <div class="workspace-grid">
-          <section class="output-panel wide">
-            <div class="panel-heading">
-              <h3>创意方案版本</h3>
-            </div>
-            <div id="variantOutput" class="variant-output empty-state">
-              <p>生成后会出现高相似版、低风险版和平台适配版，便于根据发布目标选择方案。</p>
-            </div>
-          </section>
+          <div class="page-stack">
+            <section class="output-panel">
+              <div class="panel-heading">
+                <h3>创意方案版本</h3>
+              </div>
+              <div id="variantOutput" class="variant-output empty-state">
+                <p>生成后会出现高相似版、低风险版和平台适配版。</p>
+              </div>
+            </section>
 
-          <section class="output-panel hero-output">
-            <div class="panel-heading">
-              <h3>爆款结构拆解</h3>
-              <button id="copyReport" class="ghost-button" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M8 8h10v12H8z" />
-                  <path d="M6 16H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
-                </svg>
-                复制报告
-              </button>
-            </div>
-            <div id="breakdown" class="breakdown empty-state">
-              <p>点击生成后，Agent 会提取参考视频的钩子、节奏、情绪点和可复刻公式。</p>
-            </div>
-          </section>
+            <section class="output-panel">
+              <div class="panel-heading">
+                <h3>爆款结构拆解</h3>
+                <button id="copyReport" class="ghost-button" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 8h10v12H8z" />
+                    <path d="M6 16H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
+                  </svg>
+                  复制报告
+                </button>
+              </div>
+              <div id="breakdown" class="breakdown empty-state">
+                <p>Agent 会提取参考视频的钩子、节奏、情绪点和可复刻公式。</p>
+              </div>
+            </section>
+          </div>
+        </section>
 
+        <section id="view-script" class="view-section" data-view-section="script">
+          <div class="split-page">
+            <section class="output-panel">
+              <div class="panel-heading">
+                <h3>同款原创脚本</h3>
+              </div>
+              <div id="scriptOutput" class="script-output empty-state">
+                <p>这里会生成脚本，包含开头钩子、旁白、字幕和 CTA。</p>
+              </div>
+            </section>
+            <section class="output-panel">
+              <div class="panel-heading">
+                <h3>发布文案</h3>
+              </div>
+              <div id="publishOutput" class="publish-output empty-state">
+                <p>系统会按平台生成标题、封面文案、话题标签和评论区引导。</p>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="view-storyboard" class="view-section" data-view-section="storyboard">
           <section class="output-panel">
-            <div class="panel-heading">
-              <h3>同款原创脚本</h3>
-            </div>
-            <div id="scriptOutput" class="script-output empty-state">
-              <p>这里会生成 15/30/60 秒脚本，包含开头钩子、旁白、字幕和 CTA。</p>
-            </div>
-          </section>
-
-          <section class="output-panel wide">
             <div class="panel-heading">
               <h3>分镜与 AI 生成提示词</h3>
               <button id="exportJson" class="ghost-button" type="button">
@@ -190,11 +257,13 @@
               </button>
             </div>
             <div id="storyboard" class="storyboard empty-state">
-              <p>生成后会出现逐镜头的画面、字幕、旁白、AI 视频提示词和制作方式。</p>
+              <p>生成后会出现逐镜头的画面、字幕、旁白和 AI 视频提示词。</p>
             </div>
           </section>
+        </section>
 
-          <section class="output-panel wide">
+        <section id="view-preview" class="view-section" data-view-section="preview">
+          <section class="output-panel">
             <div class="panel-heading">
               <h3>成片预览</h3>
               <button id="simulateVideo" class="ghost-button" type="button">
@@ -205,36 +274,29 @@
               </button>
             </div>
             <div id="videoPreview" class="video-preview empty-state">
-              <p>这里会显示按分镜合成的竖屏视频预览，初版先用模拟画面表达生成结果。</p>
+              <p>这里会显示按分镜合成的竖屏视频预览。</p>
             </div>
           </section>
+        </section>
 
-          <section class="output-panel">
-            <div class="panel-heading">
-              <h3>发布文案</h3>
-            </div>
-            <div id="publishOutput" class="publish-output empty-state">
-              <p>系统会按平台生成标题、封面文案、话题标签和评论区引导。</p>
-            </div>
-          </section>
-
-          <section class="output-panel">
-            <div class="panel-heading">
-              <h3>原创风险检测</h3>
-            </div>
-            <div id="riskOutput" class="risk-output empty-state">
-              <p>系统会提示哪些元素可以复用，哪些元素需要避开。</p>
-            </div>
-          </section>
-
-          <section class="output-panel wide">
-            <div class="panel-heading">
-              <h3>Agent 评测面板</h3>
-            </div>
-            <div id="evaluationOutput" class="evaluation-output empty-state">
-              <p>生成后会展示结构复刻度、原创安全分、平台适配度、提示词可用性、制作难度和脚本可发布度。</p>
-            </div>
-          </section>
+        <section id="view-evaluation" class="view-section" data-view-section="evaluation">
+          <div class="split-page">
+            <section class="output-panel">
+              <div class="panel-heading">
+                <h3>原创风险检测</h3>
+              </div>
+              <div id="riskOutput" class="risk-output empty-state">
+                <p>系统会提示哪些元素可以复用，哪些元素需要避开。</p>
+              </div>
+            </section>
+            <section class="output-panel">
+              <div class="panel-heading">
+                <h3>Agent 评测面板</h3>
+              </div>
+              <div id="evaluationOutput" class="evaluation-output empty-state">
+                <p>生成后会展示 6 项质量指标。</p>
+              </div>
+            </section>
           </div>
         </section>
 
@@ -253,18 +315,6 @@
           </div>
         </section>
 
-        <section id="view-report" class="view-section" data-view-section="report">
-          <div class="page-panel">
-            <div class="page-heading">
-              <div>
-                <p class="section-kicker">Evaluation</p>
-                <h3>评测与迭代记录</h3>
-              </div>
-            </div>
-            <div id="reportView" class="report-view"></div>
-          </div>
-        </section>
-
         <section id="view-docs" class="view-section" data-view-section="docs">
           <div class="page-panel docs-panel">
             <div class="page-heading">
@@ -273,6 +323,7 @@
                 <h3>作品集交付物</h3>
               </div>
             </div>
+            <div id="reportView" class="report-view"></div>
             <div class="doc-grid">
               <article>
                 <span>PRD</span>
@@ -287,7 +338,7 @@
               <article>
                 <span>Dataset</span>
                 <strong>样本库</strong>
-                <p>沉淀爆款视频钩子、叙事结构、视觉风格、可复刻点和风险元素。</p>
+                <p>沉淀爆款钩子、叙事结构、视觉风格、可复刻点和风险元素。</p>
               </article>
               <article>
                 <span>Evaluation</span>
