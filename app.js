@@ -1,11 +1,49 @@
 const $ = (selector) => document.querySelector(selector);
+const MODEL_CONFIG_STORAGE_KEY = "trendclone.modelConfig";
 
 const state = {
   lastPackage: null,
   videoFileName: "",
   activeVariantId: "high_similarity",
   samples: [],
+  selectedSampleId: "",
+  modelStatus: null,
 };
+
+const visualPrompts = [
+  {
+    id: "hero",
+    type: "16:9 主视觉",
+    title: "产品主视觉",
+    usage: "用于作品集展示、README 封面和工作台顶部视觉。",
+    prompt:
+      "一张 16:9 横版产品主视觉，主题是 AI 短视频创意工作台。画面中有一个现代化桌面界面，左侧是爆款视频样本，右侧是分镜、脚本、提示词和评测指标面板。风格专业、干净、有产品设计感，适合 SaaS 工具展示。配色以白色、深墨色、青绿色、少量蓝色和金色点缀为主，不要紫色渐变，不要卡通人物，不要夸张科幻，不要出现真实品牌 logo，不要生成文字。",
+  },
+  {
+    id: "preview",
+    type: "9:16 预览",
+    title: "竖屏视频预览占位图",
+    usage: "用于成片预览页的手机画面。",
+    prompt:
+      "一张 9:16 竖屏短视频封面，占位图风格，主题是 AI 生成短视频成片预览。画面包含抽象的分镜卡片、手机短视频界面、播放进度线和柔和光影。专业、简洁、适合产品 Demo，不要真实人物，不要品牌 logo，不要可读文字，不要复杂背景。",
+  },
+  {
+    id: "samples",
+    type: "4:3 缩略图",
+    title: "样本库卡片缩略图",
+    usage: "用于样本库 6 个案例的缩略图。",
+    prompt:
+      "一组 6 张 4:3 卡片缩略图，分别代表 AI 老照片动起来、AI 产品广告片、AI 电影预告片、AI 教程拆解、AI 宠物拟人、AI 新闻播报。统一视觉系统，干净的产品插画风格，有轻微真实质感，白色背景，青绿色、蓝色、金色点缀，不要真实品牌，不要可读文字。",
+  },
+  {
+    id: "empty",
+    type: "空状态",
+    title: "等待分析插画",
+    usage: "用于未生成创意包时的空状态。",
+    prompt:
+      "一张简洁的空状态插画，主题是等待 AI 分析视频结构。画面中有一个空白分镜板、一个上传视频图标、几条淡色分析线。风格克制、专业、轻量，适合 Web App 空状态，不要人物，不要文字，不要炫光，不要紫色。",
+  },
+];
 
 const archetypes = [
   {
@@ -62,6 +100,73 @@ function showToast(message) {
   toast.textContent = message;
   toast.classList.add("show");
   window.setTimeout(() => toast.classList.remove("show"), 2200);
+}
+
+function copyText(text, successMessage) {
+  navigator.clipboard
+    .writeText(text)
+    .then(() => showToast(successMessage))
+    .catch(() => showToast("当前浏览器不允许复制，请手动选择内容。"));
+}
+
+function readStoredModelConfig() {
+  try {
+    const raw = localStorage.getItem(MODEL_CONFIG_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredModelConfig(config) {
+  localStorage.setItem(MODEL_CONFIG_STORAGE_KEY, JSON.stringify(config));
+}
+
+function clearStoredModelConfig() {
+  localStorage.removeItem(MODEL_CONFIG_STORAGE_KEY);
+}
+
+function getModelConfigFromForm() {
+  return {
+    apiKey: $("#apiKeyInput").value.trim(),
+    baseUrl: $("#apiBaseUrlInput").value.trim() || "https://api.deepseek.com",
+    model: $("#apiModelInput").value.trim() || "deepseek-chat",
+  };
+}
+
+function applyModelConfigToForm(config) {
+  if (!config) return;
+  $("#apiKeyInput").value = config.apiKey || "";
+  $("#apiBaseUrlInput").value = config.baseUrl || "https://api.deepseek.com";
+  $("#apiModelInput").value = config.model || "deepseek-chat";
+}
+
+function getActiveModelConfig() {
+  const formConfig = getModelConfigFromForm();
+  if (formConfig.apiKey) return formConfig;
+  const storedConfig = readStoredModelConfig();
+  return storedConfig?.apiKey ? storedConfig : null;
+}
+
+function saveModelConfig() {
+  const config = getModelConfigFromForm();
+  if (!config.apiKey) {
+    showToast("请先填写 API Key。");
+    $("#apiKeyInput").focus();
+    return;
+  }
+  writeStoredModelConfig(config);
+  loadModelStatus();
+  showToast("网页模型配置已保存，下一次生成会使用它。");
+}
+
+function clearModelConfig() {
+  clearStoredModelConfig();
+  $("#apiKeyInput").value = "";
+  $("#apiBaseUrlInput").value = "https://api.deepseek.com";
+  $("#apiModelInput").value = "deepseek-chat";
+  loadModelStatus();
+  showToast("网页模型配置已清除。");
 }
 
 function getInputs() {
@@ -424,10 +529,12 @@ function renderScores(scores) {
 
 async function requestAgentPackage(inputs) {
   try {
+    const modelConfig = getActiveModelConfig();
+    const body = modelConfig ? { ...inputs, modelConfig } : inputs;
     const response = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(inputs),
+      body: JSON.stringify(body),
     });
     if (!response.ok) {
       throw new Error(`API request failed with ${response.status}`);
@@ -442,6 +549,44 @@ async function requestAgentPackage(inputs) {
     fallback.provider = "browser-fallback";
     fallback.warning = error.message;
     return fallback;
+  }
+}
+
+async function loadModelStatus() {
+  const card = $(".model-card");
+  const browserConfig = getActiveModelConfig();
+  if (browserConfig) {
+    state.modelStatus = {
+      configured: true,
+      mode: "browser-config",
+      baseUrl: browserConfig.baseUrl,
+      model: browserConfig.model,
+    };
+    card.classList.add("connected");
+    $("#modelStatusTitle").textContent = "网页 API 已配置";
+    $("#modelStatusMeta").textContent = `${browserConfig.model} · ${browserConfig.baseUrl}`;
+    $("#modelConfigNote").textContent = "生成时会优先使用网页配置；清除后才会回到 .env 或本地回退。";
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/model-status");
+    if (!response.ok) throw new Error(`model status ${response.status}`);
+    const status = await response.json();
+    state.modelStatus = status;
+    card.classList.toggle("connected", Boolean(status.configured));
+    $("#modelStatusTitle").textContent = status.configured ? "已连接真实大模型" : "本地回退模式";
+    $("#modelStatusMeta").textContent = status.configured
+      ? `${status.model} · ${status.baseUrl}`
+      : "未检测到 AI_API_KEY。当前仍可演示完整流程，生成由本地规则兜底。";
+    $("#modelConfigNote").textContent = status.configured
+      ? "当前使用 .env 配置；也可以在网页里临时覆盖。"
+      : "网页配置只适合本地 Demo，请不要把 API Key 提交到 GitHub。";
+  } catch (error) {
+    card.classList.remove("connected");
+    $("#modelStatusTitle").textContent = "状态读取失败";
+    $("#modelStatusMeta").textContent = error.message;
+    $("#modelConfigNote").textContent = "请确认本地服务正在运行。";
   }
 }
 
@@ -498,10 +643,7 @@ function copyReport() {
     state.lastPackage.publish.title,
   ].join("\n");
 
-  navigator.clipboard
-    .writeText(report)
-    .then(() => showToast("报告已复制到剪贴板。"))
-    .catch(() => showToast("当前浏览器不允许复制，请手动选择内容。"));
+  copyText(report, "报告已复制到剪贴板。");
 }
 
 function exportJson() {
@@ -554,7 +696,9 @@ async function loadSampleLibrary() {
     const response = await fetch("./data/sample-library.json");
     if (!response.ok) throw new Error(`sample library ${response.status}`);
     state.samples = await response.json();
+    state.selectedSampleId = state.samples[0]?.id || "";
     renderSampleLibrary(state.samples);
+    renderSampleDetail(state.samples[0]);
     renderReportView(state.samples);
   } catch (error) {
     $("#sampleLibrary").className = "sample-library empty-state";
@@ -568,7 +712,7 @@ function renderSampleLibrary(samples) {
   $("#sampleLibrary").innerHTML = samples
     .map(
       (sample) => `
-        <article class="sample-card">
+        <article class="sample-card ${sample.id === state.selectedSampleId ? "active" : ""}">
           <header>
             <span>${sample.platform} · ${sample.topicCategory}</span>
             <strong>${sample.title}</strong>
@@ -581,19 +725,104 @@ function renderSampleLibrary(samples) {
           <p><b>钩子：</b>${sample.openingHook}</p>
           <p><b>结构：</b>${sample.narrativeStructure}</p>
           <p><b>可复刻：</b>${sample.reusableStructure}</p>
-          <button type="button" data-sample-id="${sample.id}">套用这个样本</button>
+          <div class="sample-actions">
+            <button class="secondary-button" type="button" data-sample-detail-id="${sample.id}">看详情</button>
+            <button type="button" data-sample-id="${sample.id}">套用样本</button>
+          </div>
         </article>
       `,
     )
     .join("");
+  document.querySelectorAll("[data-sample-detail-id]").forEach((button) => {
+    button.addEventListener("click", () => selectSample(button.dataset.sampleDetailId));
+  });
   document.querySelectorAll("[data-sample-id]").forEach((button) => {
     button.addEventListener("click", () => applySample(button.dataset.sampleId));
   });
 }
 
-function applySample(sampleId) {
+function selectSample(sampleId) {
   const sample = state.samples.find((item) => item.id === sampleId);
   if (!sample) return;
+  state.selectedSampleId = sampleId;
+  renderSampleLibrary(state.samples);
+  renderSampleDetail(sample);
+}
+
+function renderSampleDetail(sample) {
+  if (!sample) {
+    $("#sampleDetail").className = "sample-detail empty-state";
+    $("#sampleDetail").innerHTML = "<p>选择一个样本，查看可复用结构、风险元素和改编方向。</p>";
+    return;
+  }
+  $("#sampleDetail").className = "sample-detail";
+  $("#sampleDetail").innerHTML = `
+    <header>
+      <span>${sample.platform} · ${sample.topicCategory}</span>
+      <h4>${sample.title}</h4>
+      <div class="sample-meta">
+        <b>${sample.duration}s</b>
+        <b>${sample.pacing}</b>
+        <b>${sample.cloneDifficulty}</b>
+      </div>
+    </header>
+    <dl>
+      <div>
+        <dt>开头钩子</dt>
+        <dd>${sample.openingHook}</dd>
+      </div>
+      <div>
+        <dt>叙事结构</dt>
+        <dd>${sample.narrativeStructure}</dd>
+      </div>
+      <div>
+        <dt>视觉风格</dt>
+        <dd>${sample.visualStyle}</dd>
+      </div>
+      <div>
+        <dt>可复用公式</dt>
+        <dd>${sample.reusableStructure}</dd>
+      </div>
+      <div>
+        <dt>提示词模式</dt>
+        <dd>${sample.reusablePromptPattern}</dd>
+      </div>
+      <div>
+        <dt>高风险元素</dt>
+        <dd class="risk-chip-row">${sample.highRiskElements.map((item) => `<b>${item}</b>`).join("")}</dd>
+      </div>
+      <div>
+        <dt>改编方向</dt>
+        <dd>${sample.adaptationAngle}</dd>
+      </div>
+    </dl>
+    <div class="sample-actions">
+      <button class="secondary-button" type="button" data-copy-sample="${sample.id}">复制拆解</button>
+      <button type="button" data-apply-sample-detail="${sample.id}">套用并生成</button>
+    </div>
+  `;
+  $("[data-copy-sample]")?.addEventListener("click", () => {
+    copyText(
+      [
+        sample.title,
+        `开头钩子：${sample.openingHook}`,
+        `叙事结构：${sample.narrativeStructure}`,
+        `可复用公式：${sample.reusableStructure}`,
+        `风险元素：${sample.highRiskElements.join("、")}`,
+        `改编方向：${sample.adaptationAngle}`,
+      ].join("\n"),
+      "样本拆解已复制。",
+    );
+  });
+  $("[data-apply-sample-detail]")?.addEventListener("click", () => {
+    applySample(sample.id, { autoGenerate: true });
+  });
+}
+
+function applySample(sampleId, options = {}) {
+  const sample = state.samples.find((item) => item.id === sampleId);
+  if (!sample) return;
+  state.selectedSampleId = sampleId;
   $("#referenceLink").value = "";
   $("#referenceText").value = [
     `开头钩子：${sample.openingHook}`,
@@ -613,6 +842,11 @@ function applySample(sampleId) {
   $("#shotCount").value = "auto";
   switchView("setup");
   showToast(`已套用样本：${sample.title}`);
+  renderSampleLibrary(state.samples);
+  renderSampleDetail(sample);
+  if (options.autoGenerate) {
+    generate();
+  }
 }
 
 function renderReportView(samples) {
@@ -638,6 +872,38 @@ function renderReportView(samples) {
   `;
 }
 
+function renderVisualPrompts() {
+  $("#assetPromptList").innerHTML = visualPrompts
+    .map(
+      (asset) => `
+        <article class="asset-prompt-card">
+          <header>
+            <div>
+              <span>${asset.type}</span>
+              <strong>${asset.title}</strong>
+            </div>
+            <button class="ghost-button" type="button" data-asset-prompt="${asset.id}">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 8h10v12H8z" />
+                <path d="M6 16H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
+              </svg>
+              复制
+            </button>
+          </header>
+          <p>${asset.usage}</p>
+          <code>${asset.prompt}</code>
+        </article>
+      `,
+    )
+    .join("");
+  document.querySelectorAll("[data-asset-prompt]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const asset = visualPrompts.find((item) => item.id === button.dataset.assetPrompt);
+      if (asset) copyText(asset.prompt, `${asset.title}提示词已复制。`);
+    });
+  });
+}
+
 $("#similarity").addEventListener("input", (event) => {
   $("#similarityValue").textContent = `${event.target.value}%`;
 });
@@ -654,7 +920,13 @@ $("#generateBtn").addEventListener("click", generate);
 $("#copyReport").addEventListener("click", copyReport);
 $("#exportJson").addEventListener("click", exportJson);
 $("#simulateVideo").addEventListener("click", simulateVideo);
+$("#refreshModelStatus").addEventListener("click", loadModelStatus);
+$("#saveModelConfig").addEventListener("click", saveModelConfig);
+$("#clearModelConfig").addEventListener("click", clearModelConfig);
 
 initNavigation();
+renderVisualPrompts();
+applyModelConfigToForm(readStoredModelConfig());
+loadModelStatus();
 loadSampleLibrary();
 generate();

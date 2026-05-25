@@ -51,8 +51,12 @@
             <span>07</span>
             样本库
           </button>
-          <button class="nav-item" type="button" data-view="docs">
+          <button class="nav-item" type="button" data-view="assets">
             <span>08</span>
+            视觉素材
+          </button>
+          <button class="nav-item" type="button" data-view="docs">
+            <span>09</span>
             项目文档
           </button>
         </nav>
@@ -74,7 +78,7 @@
           </div>
           <div class="hero-meter">
             <span>Agent Flow</span>
-            <strong>8 pages</strong>
+            <strong>9 pages</strong>
           </div>
         </header>
 
@@ -161,6 +165,41 @@
                 <input id="similarity" type="range" min="30" max="90" value="72" />
                 <div class="range-note">建议保留结构，降低台词、人物、音乐和画面元素相似度。</div>
               </fieldset>
+
+              <section class="model-card" aria-label="大模型接入状态">
+                <div class="model-card-header">
+                  <div>
+                    <span>Model Provider</span>
+                    <strong id="modelStatusTitle">检测中</strong>
+                    <p id="modelStatusMeta">正在读取本地模型配置。</p>
+                  </div>
+                  <button id="refreshModelStatus" class="icon-button" type="button" aria-label="刷新模型状态">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M21 12a9 9 0 0 1-15.5 6.3" />
+                      <path d="M3 12A9 9 0 0 1 18.5 5.7" />
+                      <path d="M18 2v4h4" />
+                      <path d="M6 22v-4H2" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div class="model-config-form">
+                  <label for="apiKeyInput">API Key</label>
+                  <input id="apiKeyInput" type="password" autocomplete="off" placeholder="sk-..." />
+
+                  <label for="apiBaseUrlInput">API Base URL</label>
+                  <input id="apiBaseUrlInput" type="url" value="https://api.deepseek.com" />
+
+                  <label for="apiModelInput">模型名称</label>
+                  <input id="apiModelInput" type="text" value="deepseek-chat" />
+
+                  <div class="model-config-actions">
+                    <button id="saveModelConfig" class="ghost-button strong" type="button">保存网页配置</button>
+                    <button id="clearModelConfig" class="ghost-button" type="button">清除</button>
+                  </div>
+                  <p id="modelConfigNote" class="model-config-note">网页配置只适合本地 Demo，请不要把 API Key 提交到 GitHub。</p>
+                </div>
+              </section>
 
               <button id="generateBtn" class="primary-action" type="button">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -309,8 +348,41 @@
               </div>
               <span id="sampleCount">0 条样本</span>
             </div>
-            <div id="sampleLibrary" class="sample-library empty-state">
-              <p>正在加载样本库。</p>
+            <div class="library-browser">
+              <div id="sampleLibrary" class="sample-library empty-state">
+                <p>正在加载样本库。</p>
+              </div>
+              <aside id="sampleDetail" class="sample-detail empty-state" aria-label="样本详情">
+                <p>选择一个样本，查看可复用结构、风险元素和改编方向。</p>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-assets" class="view-section" data-view-section="assets">
+          <div class="page-panel assets-panel">
+            <div class="page-heading">
+              <div>
+                <p class="section-kicker">Visual System</p>
+                <h3>视觉素材与生成提示词</h3>
+              </div>
+            </div>
+            <div class="asset-workbench">
+              <section class="asset-preview-stage" aria-label="视觉素材占位">
+                <div class="asset-screen">
+                  <span>9:16</span>
+                  <strong>AI 视频预览资产位</strong>
+                  <p>后续把你生成的封面图或样本缩略图放到 assets/ 后，这里可以替换为真实图片。</p>
+                </div>
+                <div class="asset-strip">
+                  <i></i>
+                  <i></i>
+                  <i></i>
+                </div>
+              </section>
+              <section>
+                <div id="assetPromptList" class="asset-prompt-list"></div>
+              </section>
             </div>
           </div>
         </section>

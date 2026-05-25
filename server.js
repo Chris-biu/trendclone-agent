@@ -37,6 +37,40 @@ function sendJson(res, statusCode, payload) {
   res.end(JSON.stringify(payload));
 }
 
+function getModelStatus(env = process.env) {
+  return {
+    configured: Boolean(env.AI_API_KEY),
+    baseUrl: env.AI_API_BASE_URL || "https://api.deepseek.com",
+    model: env.AI_MODEL || "deepseek-chat",
+    mode: env.AI_API_KEY ? "ai" : "local-fallback",
+  };
+}
+
+function normalizeClientModelConfig(config = {}) {
+  if (!config || typeof config !== "object" || !config.apiKey) return null;
+
+  const apiKey = String(config.apiKey || "").trim();
+  const baseUrl = String(config.baseUrl || "https://api.deepseek.com").trim();
+  const model = String(config.model || "deepseek-chat").trim();
+
+  if (!apiKey) return null;
+  if (!/^https?:\/\//i.test(baseUrl)) {
+    throw new Error("API Base URL must start with http:// or https://");
+  }
+  if (!model) {
+    throw new Error("AI model is required");
+  }
+  if (apiKey.length > 300 || baseUrl.length > 300 || model.length > 120) {
+    throw new Error("Model configuration is too long");
+  }
+
+  return {
+    AI_API_KEY: apiKey,
+    AI_API_BASE_URL: baseUrl,
+    AI_MODEL: model,
+  };
+}
+
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
     let body = "";
@@ -70,14 +104,18 @@ function safeStaticPath(urlPath) {
 async function handleGenerate(req, res) {
   try {
     const inputs = await readJsonBody(req);
+    const clientModelEnv = normalizeClientModelConfig(inputs.modelConfig);
+    const agentInputs = { ...inputs };
+    delete agentInputs.modelConfig;
     let packageResult;
     let mode = "ai";
 
     try {
-      packageResult = await generateWithOpenAICompatible(inputs);
+      const runtimeEnv = clientModelEnv ? { ...process.env, ...clientModelEnv } : process.env;
+      packageResult = await generateWithOpenAICompatible(agentInputs, runtimeEnv);
       mode = packageResult.provider === "local-fallback" ? "fallback" : "ai";
     } catch (error) {
-      packageResult = buildFallbackPackage(inputs);
+      packageResult = buildFallbackPackage(agentInputs);
       packageResult.warning = error.message;
       mode = "fallback-after-error";
     }
@@ -125,6 +163,11 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (req.method === "GET" && req.url === "/api/model-status") {
+    sendJson(res, 200, getModelStatus());
+    return;
+  }
+
   if (req.method === "GET") {
     serveStatic(req, res);
     return;
@@ -141,6 +184,8 @@ if (require.main === module) {
 }
 
 module.exports = {
+  getModelStatus,
   loadEnvFile,
+  normalizeClientModelConfig,
   server,
 };
