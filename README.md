@@ -45,12 +45,12 @@ TrendClone Agent 是一个面向 AI 视频创作者、短视频运营和小商�
 
 ## 本地运行
 
-这是一个静态前端 Demo，不需要安装依赖。
+这是一个零依赖 Node + 静态前端 Demo，不需要安装 npm 包。
 
-方式一：直接用本地静态服务运行：
+方式一：运行带 API 的本地服务：
 
 ```powershell
-py -m http.server 5179
+node server.js
 ```
 
 然后访问：
@@ -59,7 +59,26 @@ py -m http.server 5179
 http://127.0.0.1:5179
 ```
 
-方式二：直接打开 `index.html`。如果浏览器限制本地文件能力，建议使用方式一。
+方式二：只看静态前端：
+
+```powershell
+py -m http.server 5179
+```
+
+如果没有配置 API Key，服务端会自动使用本地回退生成器，保证 Demo 可以正常演示。
+
+## 大模型配置
+
+项目使用 OpenAI-compatible Chat Completions 接口。复制 `.env.example` 为 `.env`，填入自己的模型服务：
+
+```text
+AI_API_KEY=你的 API Key
+AI_API_BASE_URL=https://api.deepseek.com
+AI_MODEL=deepseek-chat
+PORT=5179
+```
+
+不填写 `AI_API_KEY` 时，系统会使用本地规则生成器。这个回退模式适合演示 UI 和产品流程；填写后，`/api/generate` 会请求真实大模型，并把模型输出规范化为稳定 JSON Schema。
 
 ## 项目结构
 
@@ -68,6 +87,13 @@ http://127.0.0.1:5179
 ├── index.html
 ├── styles.css
 ├── app.js
+├── server.js
+├── package.json
+├── .env.example
+├── server
+│   └── agent-core.js
+├── tests
+│   └── agent-core.test.js
 ├── docs
 │   ├── trendclone-prd.md
 │   └── competitor-analysis.md
@@ -84,18 +110,17 @@ http://127.0.0.1:5179
 
 ## 当前限制
 
-当前版本是 V1 原型：
+当前版本是 V2 初版：
 
-- 还没有调用真实大模型。
+- 已支持 OpenAI-compatible 大模型接口，但需要用户自行配置 API Key。
 - 上传视频暂时只读取文件信息，不做真实内容解析。
 - 成片预览是模拟结果，不输出真实 MP4。
-- 分镜、脚本和提示词由前端规则模拟生成。
+- 无 API Key 时，分镜、脚本和提示词由本地回退生成器生成。
 
 ## 后续规划
 
 V2：
 
-- 接入大模型生成真实拆解、脚本和分镜。
 - 自动抽取视频关键帧。
 - OCR 识别画面文字。
 - ASR 识别旁白和字幕。
@@ -111,4 +136,3 @@ V3：
 ## 简历描述示例
 
 独立设计并开发 TrendClone Agent，面向 AI 视频创作者的爆款视频结构复刻与原创改编工具，支持参考视频输入、爆款结构拆解、动态镜头规划、同款原创脚本生成、AI 视频提示词生成、发布文案生成和原创风险检测。完成 PRD、竞品分析、样本库模板和可交互 Web Demo，设计结构贴近度、原创安全分、生成镜头数、脚本可用率等产品指标。
-

@@ -205,8 +205,12 @@ V3 输出完整 MP4：
 已完成：
 
 - 静态 Web Demo
+- Node 本地服务
+- `/api/generate` Agent 生成接口
+- OpenAI-compatible 大模型接入配置
+- 无 API Key 时的本地回退生成器
+- 结构化 JSON Schema 归一化
 - 输入面板
-- Agent 模拟生成逻辑
 - 动态镜头数判断
 - 分镜与提示词生成
 - 成片模拟预览
@@ -215,9 +219,9 @@ V3 输出完整 MP4：
 
 未完成：
 
-- 真实大模型调用
 - 自动视频解析
 - 视频生成 API
 - MP4 合成导出
 - 用户账号和历史案例管理
 
+配置真实大模型需要在 `.env` 中设置 `AI_API_KEY`、`AI_API_BASE_URL` 和 `AI_MODEL`。未配置时，系统会自动使用本地回退生成器，保证演示流程可用。

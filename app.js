@@ -357,7 +357,30 @@ function renderScores(scores) {
   $("#scoreDifficulty").textContent = scores.difficulty;
 }
 
-function generate() {
+async function requestAgentPackage(inputs) {
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(inputs),
+    });
+    if (!response.ok) {
+      throw new Error(`API request failed with ${response.status}`);
+    }
+    const payload = await response.json();
+    if (!payload.ok || !payload.data) {
+      throw new Error(payload.error || "API returned an invalid payload");
+    }
+    return payload.data;
+  } catch (error) {
+    const fallback = buildPackage(inputs);
+    fallback.provider = "browser-fallback";
+    fallback.warning = error.message;
+    return fallback;
+  }
+}
+
+async function generate() {
   const inputs = getInputs();
   if (!inputs.goal) {
     showToast("请先填写你要推广的产品、账号或主题。");
@@ -368,8 +391,8 @@ function generate() {
   $("#agentStatus").textContent = "生成中";
   $(".status-line").classList.remove("ready");
 
-  window.setTimeout(() => {
-    const result = buildPackage(inputs);
+  try {
+    const result = await requestAgentPackage(inputs);
     state.lastPackage = result;
     renderScores(result.scores);
     renderBreakdown(result.breakdown);
@@ -378,10 +401,14 @@ function generate() {
     renderVideoPreview(result);
     renderPublish(result.publish);
     renderRisk(result.risk);
-    $("#agentStatus").textContent = "已生成创意包";
+    const providerLabel = result.provider && result.provider !== "local-fallback" && result.provider !== "browser-fallback" ? result.provider : "本地回退";
+    $("#agentStatus").textContent = `已生成 · ${providerLabel}`;
     $(".status-line").classList.add("ready");
-    showToast("同款创意包已生成，可继续调整相似度和平台。");
-  }, 420);
+    showToast(result.warning ? `已使用本地回退：${result.warning}` : "同款创意包已生成，可继续调整相似度和平台。");
+  } catch (error) {
+    $("#agentStatus").textContent = "生成失败";
+    showToast(`生成失败：${error.message}`);
+  }
 }
 
 function copyReport() {
