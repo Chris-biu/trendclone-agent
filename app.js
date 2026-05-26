@@ -706,6 +706,32 @@ function initNavigation() {
   });
 }
 
+function showWorkspace(view = "setup") {
+  $("#introScreen").hidden = true;
+  $("#appShell").hidden = false;
+  $("#skipLink").href = "#mainWorkspace";
+  $("#skipLink").textContent = "跳到主工作区";
+  switchView(view);
+  window.setTimeout(initMotion, 0);
+}
+
+function showIntro() {
+  $("#appShell").hidden = true;
+  $("#introScreen").hidden = false;
+  $("#skipLink").href = "#introScreen";
+  $("#skipLink").textContent = "跳到导入页";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.setTimeout(initMotion, 0);
+}
+
+function initIntro() {
+  $("#enterWorkspace").addEventListener("click", () => showWorkspace("setup"));
+  $("#backToIntro").addEventListener("click", showIntro);
+  document.querySelectorAll("[data-intro-view]").forEach((button) => {
+    button.addEventListener("click", () => showWorkspace(button.dataset.introView));
+  });
+}
+
 function initMotion() {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   document.body.classList.add("motion-ready");
@@ -726,18 +752,22 @@ function initMotion() {
   document
     .querySelectorAll(
       [
-        ".page-hero",
-        ".view-section.active .page-panel",
-        ".view-section.active .output-panel",
-        ".view-section.active .summary-strip article",
-        ".view-section.active .sample-card",
-        ".view-section.active .asset-prompt-card",
-        ".view-section.active .report-card",
-        ".view-section.active .doc-grid article",
-        ".view-section.active .audit-card",
-        ".view-section.active .audit-verdict",
-        ".view-section.active .audit-priority",
-        ".view-section.active .audit-pipeline",
+        ".intro-screen:not([hidden]) .intro-shell",
+        ".intro-screen:not([hidden]) .intro-copy",
+        ".intro-screen:not([hidden]) .intro-visual",
+        ".intro-screen:not([hidden]) .intro-strip article",
+        ".app-shell:not([hidden]) .page-hero",
+        ".app-shell:not([hidden]) .view-section.active .page-panel",
+        ".app-shell:not([hidden]) .view-section.active .output-panel",
+        ".app-shell:not([hidden]) .view-section.active .summary-strip article",
+        ".app-shell:not([hidden]) .view-section.active .sample-card",
+        ".app-shell:not([hidden]) .view-section.active .asset-prompt-card",
+        ".app-shell:not([hidden]) .view-section.active .report-card",
+        ".app-shell:not([hidden]) .view-section.active .doc-grid article",
+        ".app-shell:not([hidden]) .view-section.active .audit-card",
+        ".app-shell:not([hidden]) .view-section.active .audit-verdict",
+        ".app-shell:not([hidden]) .view-section.active .audit-priority",
+        ".app-shell:not([hidden]) .view-section.active .audit-pipeline",
       ].join(", "),
     )
     .forEach((element) => {
@@ -994,6 +1024,7 @@ $("#saveModelConfig").addEventListener("click", saveModelConfig);
 $("#clearModelConfig").addEventListener("click", clearModelConfig);
 
 initNavigation();
+initIntro();
 renderVisualPrompts();
 applyModelConfigToForm(readStoredModelConfig());
 loadModelStatus();

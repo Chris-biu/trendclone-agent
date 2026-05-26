@@ -7,8 +7,98 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <a class="skip-link" href="#mainWorkspace">跳到主工作区</a>
-    <main class="app-shell app-shell-pages">
+    <a id="skipLink" class="skip-link" href="#introScreen">跳到导入页</a>
+
+    <section id="introScreen" class="intro-screen" aria-label="产品导入界面">
+      <div class="intro-shell">
+        <header class="intro-topbar">
+          <div class="brand">
+            <div class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img">
+                <path d="M4 7.5 11.5 3 20 7.5v9L11.5 21 4 16.5v-9Z" />
+                <path d="M8.5 9.2 12 7.1l3.5 2.1v4.5L12 15.9l-3.5-2.2V9.2Z" />
+              </svg>
+            </div>
+            <div>
+              <h1>TrendClone</h1>
+              <p>AI 视频结构迁移 Agent</p>
+            </div>
+          </div>
+          <span class="intro-badge">Portfolio Demo</span>
+        </header>
+
+        <div class="intro-layout">
+          <section class="intro-copy">
+            <p class="section-kicker">Creative Command Room</p>
+            <h2>先理解爆款结构，再进入创作工作台</h2>
+            <p>这个 Agent 不做视频搬运，而是把参考视频拆成可复用的叙事节奏、镜头逻辑、提示词和原创风险边界，让用户做出同款节奏但不同表达的 AI 视频方案。</p>
+            <div class="intro-actions">
+              <button id="enterWorkspace" class="primary-action intro-primary" type="button">
+                进入创作工作台
+              </button>
+              <button class="ghost-button intro-route" type="button" data-intro-view="library">浏览样本库</button>
+              <button class="ghost-button intro-route" type="button" data-intro-view="audit">查看工业自审</button>
+            </div>
+          </section>
+
+          <section class="intro-visual" aria-label="导入流程预览">
+            <div class="intro-monitor">
+              <div class="intro-monitor-bar">
+                <span>Import Sequence</span>
+                <strong>Ready</strong>
+              </div>
+              <div class="intro-flow">
+                <article>
+                  <span>Input</span>
+                  <strong>参考视频 + 改编目标</strong>
+                </article>
+                <article>
+                  <span>Agent</span>
+                  <strong>结构拆解 + 风险判断</strong>
+                </article>
+                <article>
+                  <span>Output</span>
+                  <strong>脚本 / 分镜 / 提示词</strong>
+                </article>
+              </div>
+              <div class="intro-timeline" aria-hidden="true">
+                <i></i><i></i><i></i><i></i>
+              </div>
+            </div>
+            <div class="intro-phone">
+              <span>9:16</span>
+              <strong>原创改编预览</strong>
+              <p>Hook -> Proof -> Remix -> Publish</p>
+            </div>
+          </section>
+        </div>
+
+        <footer class="intro-strip" aria-label="产品流程">
+          <article>
+            <span>01</span>
+            <strong>导入参考</strong>
+            <p>上传文件、粘贴链接或套用样本。</p>
+          </article>
+          <article>
+            <span>02</span>
+            <strong>拆解结构</strong>
+            <p>识别钩子、节奏、情绪点和复用边界。</p>
+          </article>
+          <article>
+            <span>03</span>
+            <strong>生成方案</strong>
+            <p>输出脚本、分镜、提示词和发布文案。</p>
+          </article>
+          <article>
+            <span>04</span>
+            <strong>审查风险</strong>
+            <p>提醒高相似风险和上线缺口。</p>
+          </article>
+        </footer>
+      </div>
+    </section>
+
+    <main id="appShell" class="app-shell app-shell-pages" hidden>
       <aside class="app-nav" aria-label="主导航">
         <div class="brand">
           <div class="brand-mark" aria-hidden="true">
@@ -73,6 +163,7 @@
             <small>生成后按左侧步骤查看结果</small>
           </div>
         </div>
+        <button id="backToIntro" class="nav-back-button" type="button">返回导入页</button>
       </aside>
 
       <section id="mainWorkspace" class="workspace page-workspace" aria-label="主工作区">
