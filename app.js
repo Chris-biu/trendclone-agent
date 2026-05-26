@@ -8,6 +8,8 @@ const state = {
   samples: [],
   selectedSampleId: "",
   modelStatus: null,
+  motionObserver: null,
+  lastInputType: "pointer",
 };
 
 const visualPrompts = [
@@ -622,6 +624,7 @@ async function generate() {
     renderPublish(result.publish);
     renderRisk(result.risk);
     renderEvaluation(result.evaluation);
+    initMotion();
     const providerLabel = result.provider && result.provider !== "local-fallback" && result.provider !== "browser-fallback" ? result.provider : "本地回退";
     $("#agentStatus").textContent = `已生成 · ${providerLabel}`;
     $(".nav-status").classList.add("ready");
@@ -678,6 +681,7 @@ function simulateVideo() {
   $(".nav-status").classList.remove("ready");
   window.setTimeout(() => {
     renderVideoPreview(state.lastPackage, true);
+    initMotion();
     $("#agentStatus").textContent = "已生成预览";
     $(".nav-status").classList.add("ready");
     showToast("已完成模拟合成。真实 MP4 版本需要接视频生成 API 和合成服务。");
@@ -685,6 +689,7 @@ function simulateVideo() {
 }
 
 function switchView(view) {
+  document.body.classList.toggle("motion-keyboard", state.lastInputType === "keyboard");
   document.querySelectorAll("[data-view-section]").forEach((section) => {
     section.classList.toggle("active", section.dataset.viewSection === view);
   });
@@ -692,12 +697,54 @@ function switchView(view) {
     button.classList.toggle("active", button.dataset.view === view);
   });
   window.scrollTo({ top: 0, behavior: "smooth" });
+  window.setTimeout(initMotion, 0);
 }
 
 function initNavigation() {
   document.querySelectorAll("[data-view]").forEach((button) => {
     button.addEventListener("click", () => switchView(button.dataset.view));
   });
+}
+
+function initMotion() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  document.body.classList.add("motion-ready");
+  if (!state.motionObserver) {
+    state.motionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            state.motionObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
+  }
+
+  document
+    .querySelectorAll(
+      [
+        ".page-hero",
+        ".view-section.active .page-panel",
+        ".view-section.active .output-panel",
+        ".view-section.active .summary-strip article",
+        ".view-section.active .sample-card",
+        ".view-section.active .asset-prompt-card",
+        ".view-section.active .report-card",
+        ".view-section.active .doc-grid article",
+        ".view-section.active .audit-card",
+        ".view-section.active .audit-verdict",
+        ".view-section.active .audit-priority",
+        ".view-section.active .audit-pipeline",
+      ].join(", "),
+    )
+    .forEach((element) => {
+      element.dataset.motionObserved = "true";
+      element.classList.add("motion-reveal");
+      state.motionObserver.observe(element);
+    });
 }
 
 async function loadSampleLibrary() {
@@ -748,6 +795,7 @@ function renderSampleLibrary(samples) {
   document.querySelectorAll("[data-sample-id]").forEach((button) => {
     button.addEventListener("click", () => applySample(button.dataset.sampleId));
   });
+  initMotion();
 }
 
 function selectSample(sampleId) {
@@ -911,7 +959,18 @@ function renderVisualPrompts() {
       if (asset) copyText(asset.prompt, `${asset.title}提示词已复制。`);
     });
   });
+  initMotion();
 }
+
+window.addEventListener("pointerdown", () => {
+  state.lastInputType = "pointer";
+});
+
+window.addEventListener("keydown", (event) => {
+  if (["Tab", "Enter", " "].includes(event.key)) {
+    state.lastInputType = "keyboard";
+  }
+});
 
 $("#similarity").addEventListener("input", (event) => {
   $("#similarityValue").textContent = `${event.target.value}%`;
@@ -939,3 +998,4 @@ renderVisualPrompts();
 applyModelConfigToForm(readStoredModelConfig());
 loadModelStatus();
 loadSampleLibrary();
+initMotion();
